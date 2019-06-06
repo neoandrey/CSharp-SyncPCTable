@@ -1,0 +1,2 @@
+
+Table [staging].[dbo].[test_table_897.0] on localhost does not exist, or the user specified doesn't have permissions to access it.

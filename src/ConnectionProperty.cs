@@ -152,9 +152,9 @@ namespace SyncPCTables{
   }
   public ConnectionProperty(string source, string sourceDatabase, string  user, string password){
  try{
-		if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory+"\\..\\db\\safe.sqlite"))
+		if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory+"\\..\\db\\safe.sqlite;Version=3;"))
 		{
-			SQLiteConnection.CreateFile(AppDomain.CurrentDomain.BaseDirectory+"\\..\\db\\safe.sqlite");
+			SQLiteConnection.CreateFile(AppDomain.CurrentDomain.BaseDirectory+"\\..\\db\\safe.sqlite;Version=3;");
 		}
 		liteConnect = new SQLiteConnection("Data Source="+AppDomain.CurrentDomain.BaseDirectory+"\\..\\db\\safe.sqlite;Version=3;");
 		liteConnect.Open();	

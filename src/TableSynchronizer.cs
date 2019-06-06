@@ -20,11 +20,11 @@ namespace SyncPCTables{
         string destinationServer = "";
         string destinationDatabase = "";
         string destinationTable = "";
-    //    string tabDiffCmd = @"C:\Progra~1\Microsoft SQL Server\100\COM\tablediff.exe";
-	    string tabDiffCmd = @"tablediff.exe";
+        string tabDiffCmd = @"C:\Progra~1\Microsoft SQL Server\100\COM\tablediff.exe";
+	   // string tabDiffCmd = @"tablediff.exe";
         string commandString = "";
         string sqlCompSqlFile= "";
-		ConnectionProperty conProps;
+		//ConnectionProperty conProps;
 		string tabSyncSummaryFile= "";
 		
 		string sourceConnectionString;
@@ -45,7 +45,7 @@ namespace SyncPCTables{
 			this.setSourceTable(sourceTable);
 			this.setDestinationTable(destinationTable);
 			this.setSQLFile(sourceTable);
-			conProps = new ConnectionProperty(sourceServer, destinationServer, sourceDB,destinationDB );
+			//conProps = new ConnectionProperty(sourceServer, destinationServer, sourceDB,destinationDB );
 			string commandStr = getCommandString();
 			runTableComparison(commandStr);
 			initConnections();
@@ -62,7 +62,7 @@ namespace SyncPCTables{
 			this.setSourceTable(sourceTable);
 			this.setDestinationTable(destinationTable);
 			this.setSQLFile(sourceTable);
-			conProps = new ConnectionProperty(sourceServer, destinationServer, sourceDB,destinationDB );
+			//conProps = new ConnectionProperty(sourceServer, destinationServer, sourceDB,destinationDB );
 			string commandStr = getCommandString();
 			runTableComparison(commandStr);
 			initConnections();
@@ -396,7 +396,7 @@ namespace SyncPCTables{
 			} catch (Exception e)
             {
 				
-            Console.WriteLine("Error truncating  table: "+tableName+"Error:\n"+ e.Message);
+            Console.WriteLine("Error truncating  table: "+tableName+"\nError:\n"+ e.Message);
                 Console.WriteLine(e.StackTrace);
             }
 			

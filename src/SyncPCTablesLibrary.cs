@@ -36,7 +36,7 @@ namespace SyncPCTables
             public  static string 	logFile	 = AppDomain.CurrentDomain.BaseDirectory+"..\\log\\pc_sync_session_log"+DateTime.Now.ToString("yyyyMMdd_HH_mm_ss")+".log";
             public  static ConnectionProperty           sourceConnectionProps;
             public  static ConnectionProperty           destinationConnectionProps;
-            public  static Dictionary<string,string>    connectionPropsMap                   = new  Dictionary<string,string> () ;
+           // public  static Dictionary<string,string>    connectionPropsMap                   = new  Dictionary<string,string> () ;
             public static bool isSrcAccessible  = false;
 
             public  static bool isDstAccessible  = false;
@@ -66,21 +66,26 @@ namespace SyncPCTables
 					   if(!string.IsNullOrEmpty(cfgFile) ){
 
 						   string   nuCfgFile  = "";
-						   Console.WriteLine("Loading configurations in  configuration file: "+cfgFile);
+						 
 						   nuCfgFile           =  cfgFile.Contains("\\\\")? cfgFile:cfgFile.Replace("\\", "\\\\");
-                           
+                             Console.WriteLine("Loading configurations in  configuration file: "+nuCfgFile);
+
                           try{
                                     if(File.Exists(nuCfgFile)){
 
                                         configFileName          = nuCfgFile;
                                         initSyncPCTablesLibrary();
 
+                                    }else {
+
+                                         Console.WriteLine(nuCfgFile+" does not exist");
+
                                     }
                             }catch(Exception e){
 
-                                        Console.WriteLine("Error reading configuration file: "+e.Message+"\n"+e.ToString());
+                                        Console.WriteLine(e.Message+"\n"+e.ToString());
                                         Console.WriteLine(e.StackTrace);
-                                        writeToLog("Error reading configuration file: "+e.Message+"\n"+e.ToString());
+                                        writeToLog(e.Message+"\n"+e.ToString());
                                         writeToLog(e.StackTrace);
 
                             }
@@ -91,7 +96,7 @@ namespace SyncPCTables
 
               public void  initLiteConnectionString(){
 
-                 liteConnectionString =  "Data Source="+AppDomain.CurrentDomain.BaseDirectory + "..\\db\\sync_pc_inventory.sqlite;Version=3;";
+                 liteConnectionString =  "Data Source="+AppDomain.CurrentDomain.BaseDirectory + "..\\db\\safe.sqlite;Version=3;";
 
                }
 
@@ -120,7 +125,7 @@ namespace SyncPCTables
                         
                                 
                              sourceConnectionProps      = new ConnectionProperty( sourceServer, sourceDatabase );
-                             connectionPropsMap.Add(sourceServer, sourceConnectionProps.getConnectionString());
+                             //connectionPropsMap.Add(sourceServer, sourceConnectionProps.getConnectionString());
 
                     } else {
 
@@ -132,8 +137,8 @@ namespace SyncPCTables
                    
 				    if (!String.IsNullOrEmpty(destinationServer) &&  !String.IsNullOrEmpty(destinationDatabase)){ 
                                                
-                             destinationConnectionProps      = new ConnectionProperty( destinationServer, destinationDatabase );
-                             connectionPropsMap.Add(destinationServer, destinationConnectionProps.getConnectionString());
+                             destinationConnectionProps       = new ConnectionProperty( destinationServer, destinationDatabase );
+                           //  connectionPropsMap.Add(destinationServer, destinationConnectionProps.getConnectionString());
 
                     } else {
 
@@ -141,7 +146,7 @@ namespace SyncPCTables
                         writeToLog("destination connection details are not complete");
 
                     }
-
+                      
 
                     if  (!(canConnect(sourceConnectionProps.getConnectionString()) && canConnect( destinationConnectionProps.getConnectionString())
                        )){
@@ -163,7 +168,7 @@ namespace SyncPCTables
                         sourceDatabase		 	                = syncPCConfig.source_database;
                         sourcePort		 		                = syncPCConfig.source_port;
                         sourceServer		 	                = syncPCConfig.source_server;
-                        logFile			 		                = syncPCConfig.log_file.Replace("DATE_SUFFIX",DateTime.Now.ToString("yyyyMMdd_HH_mm_ss"));
+                        logFile			 		                = !string.IsNullOrWhiteSpace(syncPCConfig.log_file)? syncPCConfig.log_file.Replace("DATE_SUFFIX",DateTime.Now.ToString("yyyyMMdd_HH_mm_ss")):logFile;
                         destinationServer	                    = syncPCConfig.destination_server;
                         destinationDatabase	                    = syncPCConfig.destination_database;
                         destinationPort	                        = syncPCConfig.destination_port;
@@ -230,8 +235,7 @@ namespace SyncPCTables
 
            public  static System.Data.DataTable   getDataFromServer(string script, string  serverConString  ){
 
-                            Console.WriteLine("Executing script: ");
-                            Console.WriteLine(script);
+                            Console.WriteLine("Executing script: "+script);
                             System.Data.DataTable dt = new DataTable();
 
                             try{
