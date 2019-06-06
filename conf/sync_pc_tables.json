@@ -1,0 +1,15 @@
+{
+source_server: "localhost", 
+source_database: "staging",   
+source_port: "1433",
+destination_server: "localhost",
+destination_database: "test_db",
+destination_port: "1433",
+pc_table_type: "test_table",
+pc_tables_fetch_script: "sql\\fetch_pc_table_list.sql",
+log_file: "",
+pc_sync_type: "0",
+pc_table_list: "",
+sync_tables_at_once: 5,
+wait_interval  : 500
+}
