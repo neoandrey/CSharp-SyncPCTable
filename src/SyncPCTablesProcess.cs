@@ -67,19 +67,19 @@ namespace SyncPCTables
 				++k;
 				Console.WriteLine(k.ToString()+"."+tableName);
 				SyncPCTablesLibrary.writeToLog(k.ToString()+". "+tableName);
-
-
 			}
 		   
-            int threads   = SyncPCTablesLibrary.concurrentThreads;
+            int threads   = destinationTableList.Count;
+
             syncThreads = new Thread[threads];
             int i =0;
             foreach  (string tableName in destinationTableList){
 
             if(!syncedTableList.Contains(tableName)){	
-
+              
                 syncThreads[i]  = 	new Thread(() => synchTables(tableName));
-                syncedTableList.Add(tableName);						
+                syncedTableList.Add(tableName);	
+				  ++i;					
             }
 
             
@@ -160,9 +160,10 @@ namespace SyncPCTables
             foreach  (string tableName in destinationTableList){		
 
             if(!syncedTableList.Contains(tableName)){	
-
+                  ++i;
                 syncThreads[i]  = 	new Thread(() => synchTables(tableName));
-                syncedTableList.Add(tableName);						
+                syncedTableList.Add(tableName);		
+				Console.WriteLine("initialing thread "+i.ToString()+" for "+tableName);				
             }
 
             
@@ -181,8 +182,9 @@ namespace SyncPCTables
 	
 
 				   while( completedThreadSet.Count < destinationTableList.Count){
+                        double  waitTime  = double.Parse(SyncPCTablesLibrary.WAIT_INTERVAL.ToString())/1000.0;
 
-                        Console.WriteLine("Waiting for  " + SyncPCTablesLibrary.WAIT_INTERVAL.ToString());
+                        Console.WriteLine("Waiting for  " + waitTime.ToString()+" seconds");
                         
 						activeThreadCount = 0;
 						

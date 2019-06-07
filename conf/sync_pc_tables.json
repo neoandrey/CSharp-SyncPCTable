@@ -11,5 +11,5 @@ log_file: "",
 pc_sync_type: "0",
 pc_table_list: "",
 sync_tables_at_once: 5,
-wait_interval  : 500
+wait_interval  : 5000
 }
