@@ -45,10 +45,7 @@ namespace SyncPCTables{
 			this.setSourceTable(sourceTable);
 			this.setDestinationTable(destinationTable);
 			this.setSQLFile(sourceTable);
-			//conProps = new ConnectionProperty(sourceServer, destinationServer, sourceDB,destinationDB );
-			Console.WriteLine("Sync Parameters set");
 			string commandStr = getCommandString();
-			Console.WriteLine("Command string ready");
 			runTableComparison(commandStr);
 			initConnections();
 			runSyncSQL(getSQLFile());
