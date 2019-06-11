@@ -7,6 +7,8 @@ using System.Data.SqlClient;
 using System.IO;
 using System.IO.Compression;
 using System.Diagnostics;
+using System.Data;
+using System.Linq;
 
 namespace SyncPCTables{
 
@@ -48,7 +50,19 @@ namespace SyncPCTables{
 			string commandStr = getCommandString();
 			runTableComparison(commandStr);
 			initConnections();
+			string result     = File.ReadAllText(getOutputFile());
+			SyncPCTablesLibrary.writeToLog("Reading file: "+getOutputFile());
+			SyncPCTablesLibrary.writeToLog("Result: "+result);
+			if(result.Contains("comparison tables/views to have either a primary key, identity, rowguid or unique key column")){
+				Console.WriteLine("Running Table Merge for  Source: "+this.getSourceDatabase()+".."+this.getSourceTable()+" to Destination: "+this.getDestinationTable());              
+				string sourceTab =this.getSourceDatabase()+".."+this.getSourceTable();
+				string destTab  =this.getDestinationDatabase()+".."+this.getDestinationTable();
+				Console.WriteLine("Running Merge script for table: "+this.getDestinationTable());
+				SyncPCTablesLibrary.writeToLog("Running Merge script for table: "+this.getDestinationTable());
+				runTableMerge(sourceTab, destTab);
+			} else {
 			runSyncSQL(getSQLFile());
+			}
 			
 		}
 		
@@ -203,21 +217,11 @@ namespace SyncPCTables{
 			    cmd.WaitForExit();
 				cmd.StandardOutput.Close();             
 				cmd.StandardInput.Close();
-				result.Trim();
-                if(result.Contains("comparison tables")){
-					Console.WriteLine("Truncating table: "+this.getDestinationTable());
-                    truncateDestinationTable(this.getDestinationTable());
-					string sourceTab =this.getSourceDatabase()+".."+this.getSourceTable();
-					string destTab  =this.getDestinationDatabase()+".."+this.getDestinationTable();
-					Console.WriteLine("Running bulk insert into table: "+this.getDestinationTable());
-					runBulkInsert(sourceTab, destTab);
-                }
+				result = result.Trim(); 
                 char[] splitter =  {'\n'};
                 string[] resultComp = result.Split(splitter);
                 string resultStr = resultComp[resultComp.Length - 3]+"\n"+resultComp[resultComp.Length - 2]+"\n"+resultComp[resultComp.Length - 1];
 				System.IO.File.WriteAllText(getOutputFile(), resultStr);
-		
-               // Console.WriteLine(result);
 
             }
             catch (Exception e)
@@ -239,7 +243,7 @@ namespace SyncPCTables{
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error running table comparison: " + e.Message);
+                Console.WriteLine("Error initiating connections: " + e.Message);
                 Console.WriteLine(e.StackTrace);
 
             }
@@ -255,6 +259,7 @@ namespace SyncPCTables{
                 {
 						using (SqlConnection destinationConnection =  new SqlConnection(destinationConnectionString)){
 						string  sql_query_all = File.ReadAllText(queryFile);
+						SyncPCTablesLibrary.writeToLog("Running script: "+sql_query_all);
 						string [] lineComp;
 						destinationConnection.Open();
 						string[] lines = sql_query_all.Split('\n');
@@ -267,11 +272,73 @@ namespace SyncPCTables{
 						tempCounter = 0;
 						if(!isBulkInserted ){
 						if(  useBulkMethod)  {
-							truncateDestinationTable(this.getDestinationTable());
-							string sourceTab =this.getSourceDatabase()+".."+this.getSourceTable();
-							string destTab  =this.getDestinationDatabase()+".."+this.getDestinationTable();
-							Console.WriteLine("using bulk method for "+this.getDestinationTable());
-							runBulkInsert(sourceTab, destTab);
+						//	truncateDestinationTable(this.getDestinationTable());
+							string sourceTab   =this.getSourceDatabase()+".."+this.getSourceTable();
+							string destTab     =this.getDestinationDatabase()+".."+this.getDestinationTable();
+						//	Console.WriteLine("using bulk method for "+this.getDestinationTable());
+						 string placeHolder    =  "CURRENT_TABLE_NAME";
+						 string colScript      = SyncPCTablesLibrary.fetchColumnsScript.Replace(placeHolder,destTab);
+						 ArrayList columnList = new ArrayList();
+			             DataTable   tempTab             =   SyncPCTablesLibrary.getDataFromSQL(colScript, SyncPCTablesLibrary.destinationConnectionProps.getConnectionString());
+                
+							foreach (DataRow row in tempTab.Rows) {
+
+							foreach (DataColumn column in tempTab.Columns){
+
+							  columnList.Add(row[column].ToString());
+
+							}
+
+                		 }		
+						//	runBulkInsert(sourceTab, destTab);
+                        StringBuilder  tableUpdateClauseBuilder =  new StringBuilder();
+						StringBuilder  tableInsertClauseBuilder =  new StringBuilder();
+						StringBuilder  columnListBuilder        =  new StringBuilder();
+						StringBuilder  searchConditionsBuilder      =  new StringBuilder();
+						
+						string  sourceTable       = "src";
+						string  destTable         = "trgt";
+
+					 foreach(string col in columnList){
+
+                        tableUpdateClauseBuilder.Append(string.Format("{1}.{0}  = {2}.{0},", col,sourceTable,destTable));
+						   
+					 }
+
+					 
+					 foreach(string col in SyncPCTablesLibrary.rowSpecificFields){
+
+                        searchConditionsBuilder.Append(string.Format("{1}.{0}  = {2}.{0} AND ", col,sourceTable,destTable));
+						   
+					 }
+
+				  
+
+					   foreach(string col in columnList){
+
+                        tableInsertClauseBuilder.Append(string.Format("{0}.{1},", sourceTable,col));
+						columnListBuilder.Append(string.Format("{0},",col));
+
+					 }
+					tableUpdateClauseBuilder     = 	 SyncPCTablesLibrary.removeNLastChars(tableUpdateClauseBuilder,1);
+					tableInsertClauseBuilder     =   SyncPCTablesLibrary.removeNLastChars(tableInsertClauseBuilder,1);
+				    columnListBuilder            =   SyncPCTablesLibrary.removeNLastChars(columnListBuilder,1);
+                    searchConditionsBuilder      =   SyncPCTablesLibrary.removeNLastChars(searchConditionsBuilder,5);
+
+					string mergeScript       =   SyncPCTablesLibrary.mergeScript.Replace("DESTINATION_SERVER",SyncPCTablesLibrary.destinationServer)
+																    .Replace("DESTINATION_DATABASE",SyncPCTablesLibrary.destinationDatabase)
+																    .Replace("DESTINATION_TABLE",destTable)
+																    .Replace("SOURCE_SERVER",SyncPCTablesLibrary.sourceServer)
+																    .Replace("SOURCE_DATABASE",SyncPCTablesLibrary.sourceDatabase)	
+																    .Replace("SOURCE_TABLE",sourceTable)
+																    .Replace("SEARCH_CONDITIONS",searchConditionsBuilder.ToString())
+																    .Replace("TABLE_UPDATE_LIST",tableUpdateClauseBuilder.ToString())
+																    .Replace("TABLE_COLUMN_LIST",columnListBuilder.ToString())
+																	.Replace("TABLE_INSERT_LIST",tableInsertClauseBuilder.ToString());															   
+
+				    SyncPCTablesLibrary.executOnServer(SyncPCTablesLibrary.destinationConnectionProps.getConnectionString(),mergeScript);
+                  
+
                 } else{
 						while (tempCounter< lines.Length){
 							if(lines[tempCounter].Contains("IDENTITY_INSERT")){
@@ -331,6 +398,75 @@ namespace SyncPCTables{
             }
         }
 		
+		public void runTableMerge(string sourceTable, string destinationTable){
+
+						string placeHolder    =  "CURRENT_TABLE_NAME";
+						string colScript      = SyncPCTablesLibrary.fetchColumnsScript.Replace(placeHolder,destinationTable).Replace(SyncPCTablesLibrary.destinationDatabase+"..", "");
+						ArrayList columnList = new ArrayList();
+						ArrayList columnListNoBraces = new ArrayList();
+						DataTable   tempTab             =   SyncPCTablesLibrary.getDataFromSQL(colScript, SyncPCTablesLibrary.destinationConnectionProps.getConnectionString());
+                        string  rowData ="";
+						foreach (DataRow row in tempTab.Rows) {
+
+						foreach (DataColumn column in tempTab.Columns){
+                           rowData ="["+row[column].ToString()+"]";
+						   columnList.Add(rowData);
+						   columnListNoBraces.Add(row[column].ToString());
+
+							}
+
+                		 }		
+						//	runBulkInsert(sourceTab, destTab);
+                        StringBuilder  tableUpdateClauseBuilder =  new StringBuilder();
+						StringBuilder  tableInsertClauseBuilder =  new StringBuilder();
+						StringBuilder  columnListBuilder        =  new StringBuilder();
+						StringBuilder  searchConditionsBuilder      =  new StringBuilder();
+						
+						string  srcTable       = "src";
+						string  destTable         = "trgt";
+
+					 foreach(string col in columnList){
+
+                         tableUpdateClauseBuilder.Append(string.Format("{2}.{0}  = {1}.{0},", col,srcTable,destTable));
+						   
+					 }
+
+					 ArrayList  searchFieldList = SyncPCTablesLibrary.rowSpecificFields.Count>0?  SyncPCTablesLibrary.rowSpecificFields:columnListNoBraces;
+					 foreach(string col in searchFieldList){
+
+                        searchConditionsBuilder.Append(string.Format("{2}.[{0}]  = {1}.[{0}] AND ", col,srcTable,destTable));
+						   
+					 }
+
+				  
+
+					   foreach(string col in columnList){
+
+                        tableInsertClauseBuilder.Append(string.Format("{0},", col));
+						columnListBuilder.Append(string.Format("{0},",col));
+
+					 }
+					tableUpdateClauseBuilder     = 	 SyncPCTablesLibrary.removeNLastChars(tableUpdateClauseBuilder,1);
+					tableInsertClauseBuilder     =   SyncPCTablesLibrary.removeNLastChars(tableInsertClauseBuilder,1);
+				    columnListBuilder            =   SyncPCTablesLibrary.removeNLastChars(columnListBuilder,1);
+                    searchConditionsBuilder      =   SyncPCTablesLibrary.removeNLastChars(searchConditionsBuilder,5);
+
+					string mergeScript       =   SyncPCTablesLibrary.mergeScript.Replace("DESTINATION_SERVER",SyncPCTablesLibrary.destinationServer)
+																    .Replace("DESTINATION_DATABASE",SyncPCTablesLibrary.destinationDatabase)
+																    .Replace("DESTINATION_TABLE",destinationTable.Replace(SyncPCTablesLibrary.destinationDatabase+"..", ""))
+																    .Replace("SOURCE_SERVER",SyncPCTablesLibrary.sourceServer)
+																    .Replace("SOURCE_DATABASE",SyncPCTablesLibrary.sourceDatabase)	
+																    .Replace("SOURCE_TABLE",sourceTable.Replace(SyncPCTablesLibrary.sourceDatabase+"..", ""))
+																    .Replace("SEARCH_CONDITIONS",searchConditionsBuilder.ToString())
+																    .Replace("TABLE_UPDATE_LIST",tableUpdateClauseBuilder.ToString())
+																    .Replace("TABLE_COLUMN_LIST",columnListBuilder.ToString())
+																	.Replace("TABLE_INSERT_LIST",tableInsertClauseBuilder.ToString());															   
+
+				    SyncPCTablesLibrary.executOnServer(SyncPCTablesLibrary.destinationConnectionProps.getConnectionString(),mergeScript);
+                  
+
+			
+		}
 		public void runBulkInsert(string sourceTable, string destinationTable){
 			try{
 				

@@ -43,7 +43,7 @@ namespace SyncPCTables
 
                  string  tableListScript    =  File.ReadAllText(SyncPCTablesLibrary.pcTableFetchScript);
                  tableListScript            =  tableListScript.Replace("PC_TABLE_NAME",SyncPCTablesLibrary.pcTableType );
-                 DataTable   tempTab        =  getDataFromSQL(tableListScript, SyncPCTablesLibrary.sourceConnectionProps.getConnectionString());
+                 DataTable   tempTab        =   SyncPCTablesLibrary.getDataFromSQL(tableListScript, SyncPCTablesLibrary.sourceConnectionProps.getConnectionString());
                  foreach (DataRow row in tempTab.Rows) {
            
                     foreach (DataColumn column in tempTab.Columns){
@@ -126,7 +126,7 @@ namespace SyncPCTables
 
                  string  tableListScript    =  File.ReadAllText(SyncPCTablesLibrary.pcTableFetchScript);
                  tableListScript            =  tableListScript.Replace("PC_TABLE_NAME",SyncPCTablesLibrary.pcTableType );
-                 DataTable   tempTab        =  getDataFromSQL(tableListScript, SyncPCTablesLibrary.sourceConnectionProps.getConnectionString());
+                 DataTable   tempTab        =   SyncPCTablesLibrary.getDataFromSQL(tableListScript, SyncPCTablesLibrary.sourceConnectionProps.getConnectionString());
                  foreach (DataRow row in tempTab.Rows) {
            
                     foreach (DataColumn column in tempTab.Columns){
@@ -184,7 +184,6 @@ namespace SyncPCTables
 				   while( completedThreadSet.Count < destinationTableList.Count){
                         double  waitTime  = double.Parse(SyncPCTablesLibrary.WAIT_INTERVAL.ToString())/1000.0;
 
-                        Console.WriteLine("Waiting for  " + waitTime.ToString()+" seconds");
                         
 						activeThreadCount = 0;
 						
@@ -214,7 +213,10 @@ namespace SyncPCTables
                 Console.WriteLine("Current running count: " + syncThreads.Count().ToString());
                 SyncPCTablesLibrary.writeToLog("Current completed thread count: " + completedThreadSet.Count.ToString());
                 SyncPCTablesLibrary.writeToLog("Current running thread count: " + syncThreads.Count().ToString());
+				Console.WriteLine("Waiting for  " + waitTime.ToString()+" seconds");
+                SyncPCTablesLibrary.writeToLog( "Waiting for  " + waitTime.ToString()+" seconds");       
                 Thread.Sleep(SyncPCTablesLibrary.WAIT_INTERVAL);  
+				
 
             }
 
@@ -229,53 +231,9 @@ namespace SyncPCTables
 
 
 			  }
+			 SyncPCTablesLibrary.closeLogFile();
  }
-    public   DataTable  getDataFromSQL(string theScript, string targetConnectionString ){
-	         
-                DataTable  dt = new DataTable();
-
-                try{
-					
-                    using (SqlConnection serverConnection =  new SqlConnection(targetConnectionString)){
-                    SqlCommand cmd = new SqlCommand(theScript, serverConnection);
-                    Console.WriteLine("Executing script: "+theScript);
-                    SyncPCTablesLibrary.writeToLog("Executing script: "+theScript);
-                    cmd.CommandTimeout =0;
-                    serverConnection.Open();
-                    SqlDataReader  reader = cmd.ExecuteReader();
-                    dt.Load(reader);	
-                    cmd.Dispose();
-					
-                   }
-                } catch(Exception e){
-					
-					if(e.Message.ToLower().Contains("transport")){
-						
-						 Console.WriteLine("Error while running script: "+theScript+". The error is: "+e.Message);
-						 Console.WriteLine("The fetch session would now be restarted");
-						 SyncPCTablesLibrary.writeToLog("Error while running fetch script: "+theScript+". The error is: "+e.Message);
-						 SyncPCTablesLibrary.writeToLog("The data fetch session would now be restarted");
-						 getDataFromSQL( theScript,  targetConnectionString );
-						 SyncPCTablesLibrary.writeToLog(e.ToString());
-					     
-				
-					} else {
-						
-						Console.WriteLine("Error while running script: " + e.Message);
-						Console.WriteLine(e.StackTrace);
-						 SyncPCTablesLibrary.writeToLog(e.ToString());
-						 SyncPCTablesLibrary.writeToLog("Error while running script: " + e.Message);
-						 SyncPCTablesLibrary.writeToLog(e.StackTrace);
-						 Console.WriteLine(e.ToString());
-						 SyncPCTablesLibrary.writeToLog(e.ToString());
-						
-								
-						 }
-					}
-					return  dt;
-			  }
-
-
+    
 
      public static void Main(string[] args){
 

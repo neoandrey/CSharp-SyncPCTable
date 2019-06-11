@@ -53,7 +53,11 @@ namespace SyncPCTables
 
              public static int WAIT_INTERVAL   = 5000;
 
+             public static ArrayList  rowSpecificFields =  new ArrayList();
 
+             public static string    fetchColumnsScript = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS  WHERE  TABLE_NAME = \'CURRENT_TABLE_NAME\'";
+ 
+             public static string    mergeScript      = "";
             public  SyncPCTablesLibrary(){       
 
 					initSyncPCTablesLibrary();
@@ -178,6 +182,8 @@ namespace SyncPCTables
                         pcTableSyncList                         = syncPCConfig.pc_table_list;
                         concurrentThreads                       = syncPCConfig.sync_tables_at_once;
                         WAIT_INTERVAL                           = syncPCConfig.wait_interval;
+                        rowSpecificFields                       = syncPCConfig.row_specific_fields;
+                        mergeScript                             = File.ReadAllText(syncPCConfig.pc_tables_merge_script);
 
 			            Console.WriteLine("Configurations have been successfully initialised.");
 						
@@ -259,7 +265,7 @@ namespace SyncPCTables
                         return dt;
                 }
 
-             public  static void executOnServer( string connectionsStr, string sqlScript){
+             public  static void   executOnServer( string connectionsStr, string sqlScript){
 
                                         try{
                                             using  (SqlConnection  sqlConnect = new SqlConnection(connectionsStr)){
@@ -308,7 +314,7 @@ namespace SyncPCTables
                         return isConnectible;
                     }
 			public static void closeLogFile(){
-
+                fs.Flush();
 				fs.Close();
 
  			}
@@ -386,7 +392,7 @@ namespace SyncPCTables
              return temp;
 
        }
-        public static bool updateData(string sqlScript)
+        public static bool executeScript(string sqlScript)
         {
 
             
@@ -420,6 +426,53 @@ namespace SyncPCTables
 
 
         }
+
+        public static  DataTable  getDataFromSQL(string theScript, string targetConnectionString ){
+	         
+                DataTable  dt = new DataTable();
+
+                try{
+					
+                    using (SqlConnection serverConnection =  new SqlConnection(targetConnectionString)){
+                    SqlCommand cmd = new SqlCommand(theScript, serverConnection);
+                    Console.WriteLine("Executing script: "+theScript);
+                   writeToLog("Executing script: "+theScript);
+                    cmd.CommandTimeout =0;
+                    serverConnection.Open();
+                    SqlDataReader  reader = cmd.ExecuteReader();
+                    dt.Load(reader);	
+                    cmd.Dispose();
+					
+                   }
+                } catch(Exception e){
+					
+					if(e.Message.ToLower().Contains("transport")){
+						
+						 Console.WriteLine("Error while running script: "+theScript+". The error is: "+e.Message);
+						 Console.WriteLine("The fetch session would now be restarted");
+						writeToLog("Error while running fetch script: "+theScript+". The error is: "+e.Message);
+						writeToLog("The data fetch session would now be restarted");
+						 getDataFromSQL( theScript,  targetConnectionString );
+						writeToLog(e.ToString());
+					     
+				
+					} else {
+						
+						Console.WriteLine("Error while running script: " + e.Message);
+						Console.WriteLine(e.StackTrace);
+						writeToLog(e.ToString());
+						writeToLog("Error while running script: " + e.Message);
+						writeToLog(e.StackTrace);
+						 Console.WriteLine(e.ToString());
+						writeToLog(e.ToString());
+						
+								
+						 }
+					}
+					return  dt;
+			  }
+
+
         public static DataTable getData(string theScript)
         {
             DataTable dt = new DataTable();

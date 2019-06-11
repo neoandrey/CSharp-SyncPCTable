@@ -1,0 +1,12 @@
+===========================Started PC Tables Synchronization Session at 2019-06-11 17:28:52==============================
+2019-06-11 17:28:52=>Executing script: SELECT TABLE_NAME  FROM INFORMATION_SCHEMA.TABLES where  table_type = 'BASE TABLE' AND TABLE_NAME LIKE 'reports_crystal_[0-9]%'  ORDER BY  SUBSTRING(TABLE_NAME, (CHARINDEX('ds_', TABLE_NAME)+3), LEN(TABLE_NAME))  ASC
+2019-06-11 17:28:52=>Starting synchronization of the following  tables:
+2019-06-11 17:28:52=>1. reports_crystal_2
+2019-06-11 17:28:52=>2. reports_crystal_2_old
+2019-06-11 17:28:52=>3. reports_crystal_3
+2019-06-11 17:28:56=>Reading file: C:\Users\Mobolaji.Aina\Documents\c_sharp\sync_pc_tables\sql\reports_crystal_3_sync_summary.txt
+2019-06-11 17:28:56=>Result: -f C:\Users\Mobolaji.Aina\Documents\c_sharp\sync_pc_tables\sql\reports_crystal_3.sql
+
+The replication table difference tool requires the comparison tables/views to have either a primary key, identity, rowguid or unique key column.
+2019-06-11 17:28:56=>Running Merge script for table: reports_crystal_3
+2019-06-11 17:28:56=>Executing script: SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS  WHER

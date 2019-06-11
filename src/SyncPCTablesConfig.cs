@@ -20,7 +20,11 @@ namespace SyncPCTables
             public  ArrayList   pc_table_list {set; get;}
             public int          sync_tables_at_once    {set; get;}
 
-            public  int         wait_interval  {set; get;}
-        
+            public  int         wait_interval  {set; get;}             
+            public ArrayList   row_specific_fields {set; get;}
+
+            public string      pc_tables_merge_script {set; get;}
+
+
     }
 }
