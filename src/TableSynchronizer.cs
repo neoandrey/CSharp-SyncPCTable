@@ -296,8 +296,8 @@ namespace SyncPCTables{
 						StringBuilder  columnListBuilder        =  new StringBuilder();
 						StringBuilder  searchConditionsBuilder      =  new StringBuilder();
 						
-						string  sourceTable       = "src";
-						string  destTable         = "trgt";
+						string  sourceTable       = "SOURCE";
+						string  destTable         = "TARGET";
 
 					 foreach(string col in columnList){
 
@@ -422,8 +422,8 @@ namespace SyncPCTables{
 						StringBuilder  columnListBuilder        =  new StringBuilder();
 						StringBuilder  searchConditionsBuilder      =  new StringBuilder();
 						
-						string  srcTable       = "src";
-						string  destTable         = "trgt";
+						string  srcTable       = "SOURCE";
+						string  destTable         = "TARGET";
 
 					 foreach(string col in columnList){
 
