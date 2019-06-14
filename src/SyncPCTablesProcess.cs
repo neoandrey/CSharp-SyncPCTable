@@ -115,6 +115,7 @@ namespace SyncPCTables
 		  }catch(Exception e){
 		    SyncPCTablesLibrary.writeToLog(e.ToString());
 			Console.WriteLine(e.ToString());
+			
 
 	   }
 	   }
@@ -150,7 +151,6 @@ namespace SyncPCTables
 				++k;
 				Console.WriteLine(k.ToString()+"."+tableName);
 				SyncPCTablesLibrary.writeToLog(k.ToString()+"."+tableName);
-
 
 			}
 		   

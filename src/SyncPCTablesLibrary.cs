@@ -274,7 +274,7 @@ namespace SyncPCTables
                                                         sqlConnect.Open();
                                                         Console.WriteLine("Connection Open");
                                                     }
-                                                    Console.WriteLine("Running: "+sqlScript);
+                                                    Console.WriteLine("Running: \n"+sqlScript);
                                                     SqlCommand command = new SqlCommand(sqlScript, sqlConnect);
                                                     command.CommandTimeout = 0;
                                                     command.ExecuteNonQuery();
@@ -436,7 +436,7 @@ namespace SyncPCTables
                     using (SqlConnection serverConnection =  new SqlConnection(targetConnectionString)){
                     SqlCommand cmd = new SqlCommand(theScript, serverConnection);
                     Console.WriteLine("Executing script: "+theScript);
-                   writeToLog("Executing script: "+theScript);
+                    writeToLog("Executing script: "+theScript);
                     cmd.CommandTimeout =0;
                     serverConnection.Open();
                     SqlDataReader  reader = cmd.ExecuteReader();
