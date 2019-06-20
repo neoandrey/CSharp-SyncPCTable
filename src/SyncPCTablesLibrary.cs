@@ -265,34 +265,7 @@ namespace SyncPCTables
                         return dt;
                 }
 
-             public  static void   executOnServer( string connectionsStr, string sqlScript){
-
-                                        try{
-                                            using  (SqlConnection  sqlConnect = new SqlConnection(connectionsStr)){
-                                                    
-                                                    if(sqlConnect.State ==ConnectionState.Closed){
-                                                        sqlConnect.Open();
-                                                        Console.WriteLine("Connection Open");
-                                                    }
-                                                    Console.WriteLine("Running: \n"+sqlScript);
-                                                    SqlCommand command = new SqlCommand(sqlScript, sqlConnect);
-                                                    command.CommandTimeout = 0;
-                                                    command.ExecuteNonQuery();
-                                                    Console.WriteLine("Script complete");  
-                                                    command.Dispose();
-                                                     if(sqlConnect.State ==ConnectionState.Open)sqlConnect.Close();                                              
-                                       
-                                                }       
-                        } catch(Exception e){
-       
-                          Console.WriteLine("Error running script: "+sqlScript);
-                          Console.WriteLine(e.ToString()+"\n"+e.Message);
-                          Console.WriteLine(e.StackTrace);
-                          
-                        }
-
-                        
-                    }
+            
                  public static bool canConnect(string  sourceConnectionString){
                     bool isConnectible =false;
                     try

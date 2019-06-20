@@ -1,3 +1,0 @@
--f C:\Users\Mobolaji.Aina\Documents\c_sharp\sync_pc_tables\sql\reports_crystal_1.sql
-
-The replication table difference tool requires the comparison tables/views to have either a primary key, identity, rowguid or unique key column.

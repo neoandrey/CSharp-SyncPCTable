@@ -205,7 +205,7 @@ namespace SyncPCTables
 									
 
 								}
-								            if (activeThreadCount >= SyncPCTablesLibrary.concurrentThreads)
+		 if (activeThreadCount >= SyncPCTablesLibrary.concurrentThreads)
             {
                   
 

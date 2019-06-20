@@ -1,3 +1,0 @@
-
-Table [crystal].[dbo].[reports_crystal_4] on ISW-SPO-MA1 and Table [test_db].[dbo].[reports_crystal_4] on ISW-SPO-MA1 are identical.
-The requested operation took 17.000095 seconds.

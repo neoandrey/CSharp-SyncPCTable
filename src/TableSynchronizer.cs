@@ -336,7 +336,7 @@ namespace SyncPCTables{
 																    .Replace("TABLE_COLUMN_LIST",columnListBuilder.ToString())
 																	.Replace("TABLE_INSERT_LIST",tableInsertClauseBuilder.ToString());															   
 
-				    SyncPCTablesLibrary.executOnServer(SyncPCTablesLibrary.destinationConnectionProps.getConnectionString(),mergeScript);
+				   executOnServer(SyncPCTablesLibrary.destinationConnectionProps.getConnectionString(),mergeScript);
                   
 
                 } else{
@@ -451,7 +451,7 @@ namespace SyncPCTables{
 				    columnListBuilder            =   SyncPCTablesLibrary.removeNLastChars(columnListBuilder,1);
                     searchConditionsBuilder      =   SyncPCTablesLibrary.removeNLastChars(searchConditionsBuilder,5);
 
-					string mergeScript       =   SyncPCTablesLibrary.mergeScript.Replace("DESTINATION_SERVER",SyncPCTablesLibrary.destinationServer)
+					string mergeScript           =   SyncPCTablesLibrary.mergeScript.Replace("DESTINATION_SERVER",SyncPCTablesLibrary.destinationServer)
 																    .Replace("DESTINATION_DATABASE",SyncPCTablesLibrary.destinationDatabase)
 																    .Replace("DESTINATION_TABLE",destinationTable.Replace(SyncPCTablesLibrary.destinationDatabase+"..", ""))
 																    .Replace("SOURCE_SERVER",SyncPCTablesLibrary.sourceServer)
@@ -462,7 +462,7 @@ namespace SyncPCTables{
 																    .Replace("TABLE_COLUMN_LIST",columnListBuilder.ToString())
 																	.Replace("TABLE_INSERT_LIST",tableInsertClauseBuilder.ToString());															   
 
-				    SyncPCTablesLibrary.executOnServer(SyncPCTablesLibrary.destinationConnectionProps.getConnectionString(),mergeScript);
+				    executOnServer(SyncPCTablesLibrary.destinationConnectionProps.getConnectionString(),mergeScript);
                   
 
 			
@@ -510,6 +510,34 @@ namespace SyncPCTables{
 		}
 		}
 		
+		 public   void   executOnServer( string connectionsStr, string sqlScript){
+
+                                        try{
+                                            using  (SqlConnection  sqlConnect = new SqlConnection(connectionsStr)){
+                                                    
+                                                    if(sqlConnect.State ==ConnectionState.Closed){
+                                                        sqlConnect.Open();
+                                                        Console.WriteLine("Connection Open");
+                                                    }
+                                                    Console.WriteLine("Running: \n"+sqlScript);
+                                                    SqlCommand command = new SqlCommand(sqlScript, sqlConnect);
+                                                    command.CommandTimeout = 0;
+                                                    command.ExecuteNonQuery();
+                                                    Console.WriteLine("Script complete");  
+                                                    command.Dispose();
+                                                     if(sqlConnect.State ==ConnectionState.Open)sqlConnect.Close();                                              
+                                       
+                                                }       
+                        } catch(Exception e){
+       
+                          Console.WriteLine("Error running script: "+sqlScript);
+                          Console.WriteLine(e.ToString()+"\n"+e.Message);
+                          Console.WriteLine(e.StackTrace);
+                          
+                        }
+
+                        
+                    }
 		public  void truncateDestinationTable(string tableName) {
 			    Console.WriteLine("Truncating table "+tableName+"");
 		        destinationConnectionString =  "Network Library=DBMSSOCN;Data Source=" + SyncPCTablesLibrary.destinationConnectionProps.getSourceServer() + ","+SyncPCTablesLibrary.destinationConnectionProps.getSourcePort()+";database=" +SyncPCTablesLibrary.destinationConnectionProps.getSourceDatabase()+ ";User id=" + SyncPCTablesLibrary.destinationConnectionProps.getSourceUser()+ ";Password=" +SyncPCTablesLibrary.destinationConnectionProps.getSourcePassword() + ";Connection Timeout=0;Pooling=false;";
