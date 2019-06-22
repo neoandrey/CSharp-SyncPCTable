@@ -358,8 +358,15 @@ namespace SyncPCTables
         }
        public  static  StringBuilder removeNLastChars(StringBuilder builder,  int  numOfChars ){
                  StringBuilder temp  = new StringBuilder();
+                if( builder.Length>=numOfChars) {
                 for (int i=0; i<numOfChars;  i++  ){
-                        builder.Length--;
+                    builder.Length--;
+                 }
+                 }else {
+                     Console.WriteLine("Cannot remove "+numOfChars+" from  "+builder);
+                     writeToLog("Cannot remove "+numOfChars+" from  "+builder);
+ 
+
                  }
                  temp = builder;
              return temp;

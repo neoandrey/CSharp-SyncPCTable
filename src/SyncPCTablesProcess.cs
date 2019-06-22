@@ -179,14 +179,10 @@ namespace SyncPCTables
 				   int activeThreadCount               =  syncThreads.Count();
 				   HashSet<Thread> startedThreadSet    =  new  HashSet<Thread>();
 				   HashSet<Thread> completedThreadSet  =  new  HashSet<Thread>();
-	
 
 				   while( completedThreadSet.Count < destinationTableList.Count){
-                        double  waitTime  = double.Parse(SyncPCTablesLibrary.WAIT_INTERVAL.ToString())/1000.0;
-
-                        
+                        double  waitTime  = double.Parse(SyncPCTablesLibrary.WAIT_INTERVAL.ToString())/1000.0;               
 						activeThreadCount = 0;
-						
 						foreach(Thread pcThread  in syncThreads){
 							
 								if(pcThread.IsAlive){
@@ -201,14 +197,13 @@ namespace SyncPCTables
 										 pcThread.Start();
                                          startedThreadSet.Add(pcThread);
 										
-									}
-									
+									}		
 
 								}
-		 if (activeThreadCount >= SyncPCTablesLibrary.concurrentThreads)
-            {
-                  
 
+						}
+      if (activeThreadCount >= SyncPCTablesLibrary.concurrentThreads) {
+                  
                 Console.WriteLine("Current completed thread count: " + completedThreadSet.Count.ToString());
                 Console.WriteLine("Current running count: " + syncThreads.Count().ToString());
                 SyncPCTablesLibrary.writeToLog("Current completed thread count: " + completedThreadSet.Count.ToString());
@@ -219,10 +214,6 @@ namespace SyncPCTables
 				
 
             }
-
-						}
-
-                    
 
 				
 
