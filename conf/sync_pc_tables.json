@@ -13,7 +13,6 @@
     pc_table_list: "",
     sync_tables_at_once: 5,
     wait_interval: 5000,
-    row_specific_fields: ["pan", "expiry_date", "card_program"],
-    ,
-    force_table_merge: true
+    row_specific_fields: ["pan"],
+    frce_table_merge: true
 }
