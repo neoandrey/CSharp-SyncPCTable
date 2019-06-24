@@ -13,6 +13,7 @@
     pc_table_list: "",
     sync_tables_at_once: 5,
     wait_interval: 5000,
-    row_specific_fields: ["pan", "card_status", "date_issued", "pvv2_or_pin2_offset", "last_updated_date", "hold_rsp_code"],
+    row_specific_fields: ["pan", "expiry_date", "card_program"],
+    ,
     force_table_merge: true
 }

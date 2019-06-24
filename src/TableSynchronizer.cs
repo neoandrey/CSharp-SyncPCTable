@@ -59,7 +59,8 @@ namespace SyncPCTables{
 				string destTab  =this.getDestinationDatabase()+".."+this.getDestinationTable();
 				Console.WriteLine("Running Merge script for table: "+this.getDestinationTable());
 				SyncPCTablesLibrary.writeToLog("Running Merge script for table: "+this.getDestinationTable());
-				runTableMerge(sourceTab, destTab);
+				//runTableMerge(sourceTab, destTab);
+				runTableMerge(this.getDestinationTable(), this.getDestinationTable());
 			} else {
 			runSyncSQL(getSQLFile());
 			}
@@ -259,20 +260,7 @@ namespace SyncPCTables{
                 {
 						using (SqlConnection destinationConnection =  new SqlConnection(destinationConnectionString)){
 						string  sql_query_all = File.ReadAllText(queryFile);
-					
-						string [] lineComp;
-						destinationConnection.Open();
-						string[] lines = sql_query_all.Split('\n');
-						string identity_str = "";
-						int tempCounter = 0;
-						bool useBulkMethod =false;
-                        if (sql_query_all.ToLower().Contains("not included in this script") || SyncPCTablesLibrary.forceTableMerge ) {
-								SyncPCTablesLibrary.writeToLog("Running script: "+sql_query_all);
-								useBulkMethod =true;
-						}
-						tempCounter = 0;
-					
-						if(  useBulkMethod)  {
+					 if (SyncPCTablesLibrary.forceTableMerge || sql_query_all.ToLower().Contains("not included in this script") ) {
 						//	truncateDestinationTable(this.getDestinationTable());
 							string sourceTab   =this.getSourceDatabase()+".."+this.getSourceTable();
 							string destTab     =this.getDestinationDatabase()+".."+this.getDestinationTable();
@@ -338,9 +326,19 @@ namespace SyncPCTables{
 																	.Replace("TABLE_INSERT_LIST",tableInsertClauseBuilder.ToString());															   
 
 				   executOnServer(SyncPCTablesLibrary.destinationConnectionProps.getConnectionString(),mergeScript);
-                  
-
-                } else{
+					 } else {
+						string [] lineComp;
+						destinationConnection.Open();
+						string[] lines = sql_query_all.Split('\n');
+						string identity_str = "";
+						int tempCounter = 0;
+						//bool useBulkMethod =false;
+                       
+								SyncPCTablesLibrary.writeToLog("Running script: "+sql_query_all);
+							//	useBulkMethod =true;
+					
+						tempCounter = 0;
+			
 						while (tempCounter< lines.Length){
 							if(lines[tempCounter].Contains("IDENTITY_INSERT")){
 								identity_str = lines[tempCounter];
@@ -521,6 +519,7 @@ namespace SyncPCTables{
                                                         Console.WriteLine("Connection Open");
                                                     }
                                                     Console.WriteLine("Running: \n"+sqlScript);
+													SyncPCTablesLibrary.writeToLog("Running: \n"+sqlScript); 
                                                     SqlCommand command = new SqlCommand(sqlScript, sqlConnect);
                                                     command.CommandTimeout = 0;
                                                     command.ExecuteNonQuery();
