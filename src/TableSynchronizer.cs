@@ -259,7 +259,7 @@ namespace SyncPCTables{
                 {
 						using (SqlConnection destinationConnection =  new SqlConnection(destinationConnectionString)){
 						string  sql_query_all = File.ReadAllText(queryFile);
-						SyncPCTablesLibrary.writeToLog("Running script: "+sql_query_all);
+					
 						string [] lineComp;
 						destinationConnection.Open();
 						string[] lines = sql_query_all.Split('\n');
@@ -267,6 +267,7 @@ namespace SyncPCTables{
 						int tempCounter = 0;
 						bool useBulkMethod =false;
                         if (sql_query_all.ToLower().Contains("not included in this script") || SyncPCTablesLibrary.forceTableMerge ) {
+								SyncPCTablesLibrary.writeToLog("Running script: "+sql_query_all);
 								useBulkMethod =true;
 						}
 						tempCounter = 0;
