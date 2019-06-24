@@ -32,7 +32,7 @@ namespace SyncPCTables{
 		string sourceConnectionString;
 		string destinationConnectionString;
 		//bool isTruncated = false;
-		bool isBulkInserted = false;
+		//bool isBulkInserted = false;
 
         public TableSynchronizer()
         {
@@ -266,11 +266,11 @@ namespace SyncPCTables{
 						string identity_str = "";
 						int tempCounter = 0;
 						bool useBulkMethod =false;
-                        if (sql_query_all.ToLower().Contains("not included in this script") ) {
+                        if (sql_query_all.ToLower().Contains("not included in this script") || SyncPCTablesLibrary.forceTableMerge ) {
 								useBulkMethod =true;
 						}
 						tempCounter = 0;
-						if(!isBulkInserted ){
+					
 						if(  useBulkMethod)  {
 						//	truncateDestinationTable(this.getDestinationTable());
 							string sourceTab   =this.getSourceDatabase()+".."+this.getSourceTable();
@@ -386,7 +386,7 @@ namespace SyncPCTables{
 						}
 					Console.WriteLine(getSourceTable()+" on "+getSourceServer()+" has been successfully synchronized with "+getDestinationTable()+ " and  "+getDestinationServer());
 					destinationConnection.Close();
-					}
+					
 }
                 }
             }
@@ -497,7 +497,7 @@ namespace SyncPCTables{
 			}
 						reader2.Close();
 			}
-			isBulkInserted = true;
+			//isBulkInserted = true;
 			Console.WriteLine(sourceTable+" has been successfully synchronized with "+destinationTable );
 			
 		
@@ -505,7 +505,7 @@ namespace SyncPCTables{
 		}catch(Exception e){
 			Console.WriteLine("Error running bulk insert: " + e.Message);
             Console.WriteLine(e.StackTrace);
-			isBulkInserted = false;
+			
 			
 		}
 		}

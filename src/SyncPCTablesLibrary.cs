@@ -58,6 +58,7 @@ namespace SyncPCTables
              public static string    fetchColumnsScript = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS  WHERE  TABLE_NAME = \'CURRENT_TABLE_NAME\'";
  
              public static string    mergeScript      = "";
+             public static bool     forceTableMerge  = false;
             public  SyncPCTablesLibrary(){       
 
 					initSyncPCTablesLibrary();
@@ -184,6 +185,7 @@ namespace SyncPCTables
                         WAIT_INTERVAL                           = syncPCConfig.wait_interval;
                         rowSpecificFields                       = syncPCConfig.row_specific_fields;
                         mergeScript                             = File.ReadAllText(syncPCConfig.pc_tables_merge_script);
+                        forceTableMerge                         = syncPCConfig.force_table_merge;
 
 			            Console.WriteLine("Configurations have been successfully initialised.");
 						

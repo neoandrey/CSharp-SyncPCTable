@@ -24,6 +24,7 @@ namespace SyncPCTables
             public ArrayList   row_specific_fields {set; get;}
 
             public string      pc_tables_merge_script {set; get;}
+            public bool      force_table_merge {set; get;}
 
 
     }
