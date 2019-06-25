@@ -1,11 +1,11 @@
 {
-    source_server: "ISW-SPO-MA1",
-    source_database: "crystal",
+    source_server: "172.25.15.15",
+    source_database: "postcard",
     source_port: "1433",
-    destination_server: "ISW-SPO-MA1",
-    destination_database: "test_db",
+    destination_server: "172.25.10.93",
+    destination_database: "postcard",
     destination_port: "1433",
-    pc_table_type: "reports_crystal",
+    pc_table_type: "pc_cards",
     pc_tables_fetch_script: "sql\\fetch_pc_table_list.sql",
     pc_tables_merge_script: "sql\\merge_pc_tables.sql",
     log_file: "",
@@ -14,5 +14,5 @@
     sync_tables_at_once: 5,
     wait_interval: 5000,
     row_specific_fields: ["pan"],
-    frce_table_merge: true
+    force_table_merge: true
 }
